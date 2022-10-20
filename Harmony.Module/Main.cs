@@ -8,6 +8,7 @@ using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using CloudTheWolf.DSharpPlus.Scaffolding.Logging;
+using Harmony.Module.Actions;
 using Harmony.Module.Commands;
 
 
@@ -22,13 +23,14 @@ namespace Harmony.Module
         public static InteractivityExtension Interactivity;
         public static DiscordClient Client;
         private static DiscordConfiguration _discordConfiguration;
+        private static IConfiguration _applicationConfig;
 
         public void InitPlugin(IBot bot, ILogger<Logger> logger, DiscordConfiguration discordConfiguration, IConfigurationRoot applicationConfig)
         {
             try
             {
                 Logger = logger;
-                LoadConfig(applicationConfig);
+                LoadConfig(applicationConfig, bot);
                 _discordConfiguration = discordConfiguration;
                  logger.LogInformation(this.Name + ": Loaded successfully!");
                  if (!Libs.OperatingSystem.IsWindows())
@@ -46,7 +48,7 @@ namespace Harmony.Module
             }
         }
 
-        private static void LoadConfig(IConfiguration applicationConfig)
+        private static void LoadConfig(IConfiguration applicationConfig, IBot bot)
         {
             Options.MySqlHost = applicationConfig.GetValue<string>("SQL:Host");
             Options.MySqlPort = applicationConfig.GetValue<int>("SQL:Port");
@@ -54,10 +56,12 @@ namespace Harmony.Module
             Options.MySqlPassword = applicationConfig.GetValue<string>("SQL:pass");
             Options.MySqlDatabase = applicationConfig.GetValue<string>("SQL:name");
             Options.CompanyName = applicationConfig.GetValue<string>("CompanyName");
+            ;
         }
 
         private static void AddCommands(IBot bot, string Name)
         {
+            bot.SlashCommandsExt.RegisterCommands<StaffActions>();
             bot.Commands.RegisterCommands<StaffCommands>();
             Logger.LogInformation(Name + ": Registered {0}!", nameof(StaffCommands));
             
@@ -65,7 +69,38 @@ namespace Harmony.Module
 
         private static async Task SetStatus(DiscordClient client, GuildDownloadCompletedEventArgs args)
         {
-            await client.UpdateStatusAsync(new DiscordActivity("The World Go By", (ActivityType)3));
+            var gName = Client.Guilds[_applicationConfig.GetValue<ulong>("GuildId")].Name;
+            Options.ManagerRole = Client.Guilds[_applicationConfig.GetValue<ulong>("GuildId")]
+                .GetRole(_applicationConfig.GetValue<ulong>("ManagerRole"));
+            var status = new Random().Next(1,6);
+            Console.WriteLine($"{gName} - {status}");
+            switch (status)
+            {
+                case 1:
+                    await client.UpdateStatusAsync(new DiscordActivity("Life", ActivityType.Competing));
+                    break;
+                case 2:
+                    await client.UpdateStatusAsync(new DiscordActivity("LegacyRP", ActivityType.Playing));
+                    break;
+                case 3:
+                    await client.UpdateStatusAsync(new DiscordActivity("Epic Music", ActivityType.ListeningTo));
+                    break;
+                case 4:
+                    var stream = new DiscordActivity("On Twitch", ActivityType.Streaming)
+                    {
+                        Name = "On Twitch",
+                        ActivityType = ActivityType.Streaming,
+                        StreamUrl = "https://www.twitch.tv/monstercat"
+                    };
+                    await client.UpdateStatusAsync(stream);
+                    break;
+                default:
+                    await client.UpdateStatusAsync(new DiscordActivity($"{gName}", ActivityType.Watching));
+                    break;
+            }
+            
+            Options.ManagerRole = Client.Guilds[_applicationConfig.GetValue<ulong>("GuildId")]
+                .GetRole(_applicationConfig.GetValue<ulong>("ManagerRole"));
         }
     }
 }
