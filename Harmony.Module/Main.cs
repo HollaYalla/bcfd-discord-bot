@@ -56,7 +56,8 @@ namespace Harmony.Module
             Options.MySqlPassword = applicationConfig.GetValue<string>("SQL:pass");
             Options.MySqlDatabase = applicationConfig.GetValue<string>("SQL:name");
             Options.CompanyName = applicationConfig.GetValue<string>("CompanyName");
-            ;
+            Options.GuildId = applicationConfig.GetValue<ulong>("GuildId");
+            Options.ManagerRoleId = applicationConfig.GetValue<ulong>("ManagerRole");
         }
 
         private static void AddCommands(IBot bot, string Name)
@@ -69,9 +70,9 @@ namespace Harmony.Module
 
         private static async Task SetStatus(DiscordClient client, GuildDownloadCompletedEventArgs args)
         {
-            var gName = Client.Guilds[_applicationConfig.GetValue<ulong>("GuildId")].Name;
-            Options.ManagerRole = Client.Guilds[_applicationConfig.GetValue<ulong>("GuildId")]
-                .GetRole(_applicationConfig.GetValue<ulong>("ManagerRole"));
+            var gName = Client.Guilds[Options.GuildId].Name;
+            Options.ManagerRole = Client.Guilds[Options.GuildId]
+                .GetRole(Options.ManagerRoleId);
             var status = new Random().Next(1,6);
             Console.WriteLine($"{gName} - {status}");
             switch (status)
@@ -98,9 +99,6 @@ namespace Harmony.Module
                     await client.UpdateStatusAsync(new DiscordActivity($"{gName}", ActivityType.Watching));
                     break;
             }
-            
-            Options.ManagerRole = Client.Guilds[_applicationConfig.GetValue<ulong>("GuildId")]
-                .GetRole(_applicationConfig.GetValue<ulong>("ManagerRole"));
         }
     }
 }

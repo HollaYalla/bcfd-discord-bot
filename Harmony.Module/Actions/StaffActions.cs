@@ -6,13 +6,15 @@ using Harmony.Module.Common;
 using Harmony.Module.Libs;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Harmony.Module.Actions
 {
-    [SlashCommandGroup("Timesheets", "Staff Timesheets", false)]
+    [SlashCommandGroup("Timesheets", "Staff Timesheets", true)]
     class StaffActions : ApplicationCommandModule
     {
         private static DatabaseActions da = new DatabaseActions();
@@ -55,6 +57,84 @@ namespace Harmony.Module.Actions
             StaffActions.da.ClockOutUser(member.Nickname);
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{member.Mention} has been clocked out by {ctx.Member.Mention} with the reason: {reason}"));
             
+        }
+
+        [SlashCommand("clockin", "Clock In via the bot", true)]
+        public async Task ClockIn(InteractionContext ctx,
+            [Choice("Tow", "Tow")]
+            [Choice("Mechanic", "Mechanic")]
+            [Choice("Scuba", "Scuba")]
+            [Choice("Event", "Event")]
+            [Choice("Trainer", "Trainer")]
+            [Choice("Management", "Management")]
+            [Option("Clock-In-As", "What are you clocking in as?")]
+            string state = "Off-Duty")
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            dynamic user = da.GetUser(ctx.Member.Nickname);
+            try
+            {
+                Main.Logger.LogInformation($"Set User {user[0]["id"]} as {state}");
+                var time = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                if((state == "Trainer" || state == "Management") && user[0]["IsAdmin"] == 0)
+                {
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("You can't clock in as that"));
+                    return;
+                }
+
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"{ctx.Guild.Name} Time Tracker",
+                    Color = DiscordColor.Green,
+
+                };
+
+                da.ClockInUser(ctx.Member.Nickname, (int)user[0]["id"], state, ((int)user[0]["onDuty"] == 1));
+                embed.AddField($"{ctx.Member.Nickname} has started work",
+                    $"{ctx.Member.Nickname} has Clocked In As {state} @ <t:{time}:d> <t:{time}:T>");
+
+
+                await ctx.EditResponseAsync(
+                    new DiscordWebhookBuilder().AddEmbed(embed));
+            }
+            catch (Exception e)
+            {
+                Main.Logger.LogError(e.Message);
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(
+                    "Something went wrong, Make sure your Discord Nickname is the same as you name on the control panel."));
+            }
+        }
+
+        [SlashCommand("clockout", "Clock Out via the bot", true)]
+        public async Task ClockOut(InteractionContext ctx)
+        {
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
+            dynamic user = da.GetUser(ctx.Member.Nickname);
+            try
+            {
+                Main.Logger.LogInformation($"Set User {user[0]["id"]} as Off-Duty");
+                var time = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                var embed = new DiscordEmbedBuilder
+                {
+                    Title = $"{ctx.Guild.Name} Time Tracker",
+                    Color = DiscordColor.Red,
+
+                };
+
+                da.ClockOutUser(ctx.Member.Nickname);
+                embed.AddField($"{ctx.Member.Nickname} has stopped work",
+                    $"{ctx.Member.Nickname} has Clocked Out @ <t:{time}:d> <t:{time}:T>");
+
+
+                await ctx.EditResponseAsync(
+                    new DiscordWebhookBuilder().AddEmbed(embed));
+            }
+            catch (Exception e)
+            {
+                Main.Logger.LogError(e.Message);
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(
+                    "Something went wrong, Make sure your Discord Nickname is the same as you name on the control panel."));
+            }
         }
     }
 }

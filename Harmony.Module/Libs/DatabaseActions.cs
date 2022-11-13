@@ -91,6 +91,19 @@ namespace Harmony.Module.Libs
             DbLogger.LogInformation($"Update workTime table");
             _sda.Request($"UPDATE `workTime` JOIN `users` on `users`.`cid` = `workTime`.`cid` SET `workTime`.`clockOutAt` = CURRENT_TIMESTAMP WHERE `users`.`name` = '{name.Replace("'", "''")}' and `workTime`.`totalTime` = 0;", DbLogger);
         }
+        /// <summary>
+        /// Update the user to be in a Clocked In Status
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="state"></param>
+        public void ClockInUser(string name, int id, string state,bool update = false)
+        {
+            DbLogger.LogInformation($"Setting {name} as {state}");
+            _sda.Request($"UPDATE `users` SET `onDuty` = 1, workingAs = '{state}' where id = '{id}'", DbLogger);
+            if(update) return;
+            DbLogger.LogInformation($"Update workTime table");
+            _sda.Request($"INSERT INTO `workTime`( `cid`) VALUES ('{id}')", DbLogger);
+        }
 
         /// <summary>
         /// Debug Function to return generated SQL 
@@ -120,6 +133,13 @@ namespace Harmony.Module.Libs
                 $"and users.name = '{name.Replace("'", "''")}';\n" +
             $"SELECT SUM(`totalTime`) as Time FROM `workTime` INNER JOIN `users` on workTime.cid = users.cid WHERE {lastWeekTimeWindow} " +
                 $"and users.name = '{name.Replace("'", "''")}';\n";
+        }
+
+        public JArray GetUser(string name)
+        {
+            DbLogger.LogInformation($"Getting Profile Of {name}");
+            var user = _sda.Request($"SELECT * FROM `users` WHERE `disabled` = 0 and name = '{name.Replace("'", "''")}';", DbLogger);
+            return JArray.Parse(user);
         }
     }
 }

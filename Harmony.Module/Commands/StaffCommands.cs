@@ -22,8 +22,7 @@ namespace Harmony.Module.Commands
         [Description("Get how much time you have worked on this week")]
         public async Task Time(CommandContext ctx, DiscordMember member = null, [RemainingText] string extra = null)
         {
-            member = member ?? ctx.Member;
-            await StaffCommon.GetUserTime(ctx,member);
+            await ctx.RespondAsync("`.` Commands are no longer available, please use `/` Commands now. Ty");
         }
         
         [Command("thisWeek")]
@@ -31,10 +30,7 @@ namespace Harmony.Module.Commands
         [Description("Get times for all staff for current week")]
         public async Task ThisWeek(CommandContext ctx)
         {
-            Main.Logger.LogInformation($"New This Week Check Request By {ctx.Member.Username}#{ctx.Member.Discriminator} in {ctx.Guild.Name}");
-            await StaffCommon.GetThisWeek(ctx);
-            Main.Logger.LogInformation("Deleting Command Request");
-            await ctx.Message.DeleteAsync();
+            await ctx.RespondAsync("`.` Commands are no longer available, please use `/` Commands now. Ty");
         }
 
         [Command("lastWeek")]
@@ -42,10 +38,7 @@ namespace Harmony.Module.Commands
         [Description("Get all activity for Last Week")]
         public async Task LastWeek(CommandContext ctx)
         {
-            Main.Logger.LogInformation($"New Last Week Check Request By {ctx.Member.Username}#{ctx.Member.Discriminator} in {ctx.Guild.Name}");
-
-            Main.Logger.LogInformation("Deleting Command Request");
-            await ctx.Message.DeleteAsync();
+            await ctx.RespondAsync("`.` Commands are no longer available, please use `/` Commands now. Ty");
         }
 
         [Command("toaltime")]
@@ -53,7 +46,7 @@ namespace Harmony.Module.Commands
         [Description("Get how much time you have worked on this week")]
         public async Task TotalTime(CommandContext ctx, DiscordMember member = null, [RemainingText] string extra = null)
         {
-            StaffCommon.GetTotalTime(ctx, member);
+            await ctx.RespondAsync("`.` Commands are no longer available, please use `/` Commands now. Ty");
         }
 
 
@@ -62,23 +55,7 @@ namespace Harmony.Module.Commands
         [Description("Force Clock Out Mentioned User")]
         public async Task ForceOffDuty(CommandContext ctx, DiscordMember member, [RemainingText] string reason = null)
         {
-            Main.Logger.LogInformation($"New Force Clock Out Request By {ctx.Member.Username}#{ctx.Member.Discriminator} in {ctx.Guild.Name} for {member.Nickname}");
-            if (!ctx.Member.Roles.Contains(Options.ManagerRole)) return;
-
-            da.ClockOutUser(member.Nickname);
-
-            await ctx.Channel.SendMessageAsync(
-                $"{member.Mention} has been clocked out by {ctx.Member.Mention} with the reason: {reason}");
-            await ctx.Message.DeleteAsync();
-        }
-
-        [Command("debugSql")]
-        [RequireOwner()]
-        [Description("Debug Time Sheet SQL Queries")]
-        public async Task DebugSql(CommandContext ctx)
-        {
-            var message = da.DebugGetUserTime(ctx.Member.Nickname);
-            await ctx.RespondAsync($"```sql\n{message}\n```");
+            await ctx.RespondAsync("`.` Commands are no longer available, please use `/` Commands now. Ty");
         }
     }
 }

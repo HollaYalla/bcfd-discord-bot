@@ -105,7 +105,7 @@ namespace Harmony.Module.Common
         public static async Task GetLastWeek(InteractionContext ctx)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-            var (embed, embed2, embed3) = await GetWeekEmbed();
+            var (embed, embed2, embed3) = await GetWeekEmbed(false);
 
             if (embed3.Fields.Count > 0)
             {

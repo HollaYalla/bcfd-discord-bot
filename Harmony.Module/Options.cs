@@ -17,5 +17,9 @@ namespace Harmony.Module
         public static string CompanyName { get; set; } = null!;
 
         public static DiscordRole ManagerRole { get; set; }
+
+        public static ulong GuildId { get; set; }
+        
+        public static ulong ManagerRoleId { get; set; }
     }
 }
