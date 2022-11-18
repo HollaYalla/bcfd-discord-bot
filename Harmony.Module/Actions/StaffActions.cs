@@ -89,7 +89,7 @@ namespace Harmony.Module.Actions
 
                 };
 
-                da.ClockInUser(ctx.Member.Nickname, (int)user[0]["id"], state, ((int)user[0]["onDuty"] == 1));
+                da.ClockInUser(ctx.Member.Nickname, (int)user[0]["cid"], state, ((int)user[0]["onDuty"] == 1));
                 embed.AddField($"{ctx.Member.Nickname} has started work",
                     $"{ctx.Member.Nickname} has Clocked In As {state} @ <t:{time}:d> <t:{time}:T>");
 
