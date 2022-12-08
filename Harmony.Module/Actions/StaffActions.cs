@@ -53,6 +53,7 @@ namespace Harmony.Module.Actions
             if (!ctx.Member.Roles.Contains<DiscordRole>(Options.ManagerRole))
             {
                 DiscordMessage discordMessage1 = await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Oops, you don't have access to this command"));
+                return;
             }
             StaffActions.da.ClockOutUser(member.Nickname);
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{member.Mention} has been clocked out by {ctx.Member.Mention} with the reason: {reason}"));
