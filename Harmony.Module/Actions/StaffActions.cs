@@ -48,7 +48,7 @@ namespace Harmony.Module.Actions
         public async Task ForceOffDuty(InteractionContext ctx, [Option("user", "User to force off duty", false)] DiscordUser user, [Option("reason", "Reason to force off duty", false)] string reason = "")
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
-            var member = user == null ? await ctx.Guild.GetMemberAsync(user.Id) : ctx.Member;
+            var member = user != null ? await ctx.Guild.GetMemberAsync(user.Id) : ctx.Member;
             Main.Logger.LogInformation($"New Force Clock Out Request By {ctx.Member.Username}#{ctx.Member.Discriminator} in {ctx.Guild.Name} for {member.Nickname}");
             if (!ctx.Member.Roles.Contains<DiscordRole>(Options.ManagerRole))
             {
