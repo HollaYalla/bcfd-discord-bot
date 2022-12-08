@@ -9,7 +9,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using CloudTheWolf.DSharpPlus.Scaffolding.Logging;
 using Harmony.Module.Actions;
-using Harmony.Module.Commands;
 
 
 namespace Harmony.Module
