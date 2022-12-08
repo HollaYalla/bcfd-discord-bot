@@ -63,8 +63,7 @@ namespace Harmony.Module
         private static void AddCommands(IBot bot, string Name)
         {
             bot.SlashCommandsExt.RegisterCommands<StaffActions>();
-            bot.Commands.RegisterCommands<StaffCommands>();
-            Logger.LogInformation(Name + ": Registered {0}!", nameof(StaffCommands));
+            Logger.LogInformation(Name + ": Registered {0}!", nameof(StaffActions));
             
         }
 
