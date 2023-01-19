@@ -117,10 +117,24 @@ namespace DOJ.Module.Common
                         records.Add(new KeyValuePair<string, string>($"{staff["first_name"]} {staff["last_name"]}", $"No time on duty {prefix} week."));
                         continue;
                     }
-                    var workTime = new TimeSpan();
+                    var workTimeNormal = new TimeSpan();
+                    var workTimeUndercover = new TimeSpan();
+                    var workTimeTraining = new TimeSpan();
+                    var workTimeTotal = new TimeSpan();
+                    
                     try
                     {
-                        workTime = TimeSpan.FromSeconds(int.Parse(staff["on_duty_time"]["Law Enforcement"][$"{weekId}"].ToString()));
+                        if (weekId < 107)
+                        {
+                            workTimeTotal = TimeSpan.FromSeconds(int.Parse(data["Law Enforcement"][$"{weekId}"].ToString()));
+                        }
+                        else
+                        {
+                            workTimeNormal = TimeSpan.FromSeconds(int.Parse(data["Law Enforcement"][$"{weekId}"]["normal"].ToString()));
+                            workTimeUndercover = TimeSpan.FromSeconds(int.Parse(data["Law Enforcement"][$"{weekId}"]["undercover"].ToString()));
+                            workTimeTraining = TimeSpan.FromSeconds(int.Parse(data["Law Enforcement"][$"{weekId}"]["training"].ToString()));
+                            workTimeTotal = workTimeNormal.Add(workTimeUndercover).Add(workTimeTraining);
+                        }
                     }
                     catch (Exception e)
                     {
@@ -128,24 +142,7 @@ namespace DOJ.Module.Common
                         continue;
                     }
 
-                    var workTimeString = "";
-
-                    if (workTime.TotalHours >= 24)
-                    {
-                        workTimeString += $"{workTime.Days} Days, {workTime.Hours} Hours and {workTime.Minutes} minutes";
-                    }
-                    else if (workTime.TotalHours < 24 && workTime.TotalHours >= 1)
-                    {
-                        workTimeString += $"{workTime.Hours} Hours and {workTime.Minutes} minutes";
-                    }
-                    else if (workTime.TotalMinutes < 60 && workTime.TotalMinutes >= 1)
-                    {
-                        workTimeString += $"{workTime.Minutes} minutes";
-                    }
-                    else if (workTime.TotalMinutes < 1)
-                    {
-                        workTimeString += $"less than a minute";
-                    }
+                    var workTimeString = ($"{workTimeTotal.Days} Days, {workTimeTotal.Hours} Hours, {workTimeTotal.Minutes} Minutes and {workTimeTotal.Minutes} Seconds");
 
                     records.Add(new KeyValuePair<string, string>($"{staff["first_name"]} {staff["last_name"]}", $"{workTimeString} {prefix} week."));
                 }
@@ -225,30 +222,30 @@ namespace DOJ.Module.Common
                     return $"{characterName}, you have no time on duty this week";                
                 }
                 
-                var workTime = new TimeSpan();
+                var workTimeNormal = new TimeSpan();
+                var workTimeUndercover = new TimeSpan();
+                var workTimeTraining = new TimeSpan();
+                var workTimeTotal = new TimeSpan();
                 try
                 {
-                    workTime = TimeSpan.FromSeconds(int.Parse(characterData["on_duty_time"]["Law Enforcement"][$"{weekId}"].ToString()));
+                    if(weekId < 107)
+                    {
+                        workTimeTotal = TimeSpan.FromSeconds(int.Parse(characterData["on_duty_time"]["Law Enforcement"][$"{weekId}"].ToString()));
+                    }
+                    else
+                    {
+                        workTimeNormal = TimeSpan.FromSeconds(int.Parse(characterData["on_duty_time"]["Law Enforcement"][$"{weekId}"]["normal"].ToString()));
+                        workTimeUndercover = TimeSpan.FromSeconds(int.Parse(characterData["on_duty_time"]["Law Enforcement"][$"{weekId}"]["undercover"].ToString()));
+                        workTimeTraining = TimeSpan.FromSeconds(int.Parse(characterData["on_duty_time"]["Law Enforcement"][$"{weekId}"]["training"].ToString()));
+                        workTimeTotal = workTimeNormal.Add(workTimeUndercover).Add(workTimeTraining);
+                    }
+                    
                 } 
                 catch(Exception e)
                 {
                     return $"{characterName}, you have no time on duty this week";
                 }
-                var workTimeString = "";
-
-                if(workTime.TotalHours >= 24)
-                {
-                    workTimeString += $"{workTime.Days} Days, {workTime.Hours} Hours and {workTime.Minutes} minutes";
-                }else if (workTime.TotalHours < 24 && workTime.TotalHours >= 1)
-                {
-                    workTimeString += $"{workTime.Hours} Hours and {workTime.Minutes} minutes";
-                } else if (workTime.TotalMinutes < 60 && workTime.TotalMinutes >= 1)
-                {
-                    workTimeString += $"{workTime.Minutes} minutes";
-                } else if (workTime.TotalMinutes < 1)
-                {
-                    workTimeString += $"less than a minute";
-                }
+                var workTimeString = ($"{workTimeTotal.Days} Days, {workTimeTotal.Hours} Hours, {workTimeTotal.Minutes} Minutes and {workTimeTotal.Minutes} Seconds");
 
                 return $"{characterName}, you currently have total of **{workTimeString}** on duty this week";
 
