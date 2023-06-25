@@ -5,7 +5,11 @@ VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Harmony.Module", "Harmony.Module\Harmony.Module.csproj", "{B0AFB069-EBB4-4B93-AD4C-B451895DCE97}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DOJ.Module", "DOC.Module\DOC.Module.csproj", "{AE0E293E-E04F-40EF-9EFD-EF20B4509C8E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DOC.Module", "DOC.Module\DOC.Module.csproj", "{AE0E293E-E04F-40EF-9EFD-EF20B4509C8E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aod.Module", "Aod.Module\Aod.Module.csproj", "{4EE70966-2DD3-46FD-AA46-53C6059AF52B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BCFD.Module", "BCFD.Module\BCFD.Module.csproj", "{28FC3A23-D2BE-4B1F-9547-7C23191CBCBC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{AE0E293E-E04F-40EF-9EFD-EF20B4509C8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE0E293E-E04F-40EF-9EFD-EF20B4509C8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE0E293E-E04F-40EF-9EFD-EF20B4509C8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EE70966-2DD3-46FD-AA46-53C6059AF52B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EE70966-2DD3-46FD-AA46-53C6059AF52B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EE70966-2DD3-46FD-AA46-53C6059AF52B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EE70966-2DD3-46FD-AA46-53C6059AF52B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28FC3A23-D2BE-4B1F-9547-7C23191CBCBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28FC3A23-D2BE-4B1F-9547-7C23191CBCBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28FC3A23-D2BE-4B1F-9547-7C23191CBCBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28FC3A23-D2BE-4B1F-9547-7C23191CBCBC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

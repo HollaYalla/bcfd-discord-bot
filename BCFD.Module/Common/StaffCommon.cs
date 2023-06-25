@@ -1,34 +1,40 @@
-﻿using CloudTheWolf.DSharpPlus.Scaffolding.Logging;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
-using DOJ.Module.Libs;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
-using DSharpPlus.Net;
-using RestSharp;
-using System.Net;
-using Microsoft.IdentityModel.Tokens;
+﻿using System.Diagnostics.Metrics;
 using System.Globalization;
-using System.Diagnostics.Metrics;
-using Newtonsoft.Json.Linq;
+using System.Net;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-namespace DOJ.Module.Common
+using BCFD.Module.Libs;
+
+using CloudTheWolf.DSharpPlus.Scaffolding.Logging;
+
+using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
+using DSharpPlus.Net;
+using DSharpPlus.SlashCommands;
+
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
+
+using RestSharp;
+
+namespace BCFD.Module.Common
 {
     internal class StaffCommon
     {
         private static readonly ILogger<Logger> Logger = Main.Logger;
 
-        public static async Task GetUserTime(InteractionContext ctx, string member)
+        public static async Task GetUserTime(InteractionContext ctx, string member, bool getLastWeek = false)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
             try
             {
-                var message = CalculateTime(member);
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(message));
+                var week = CalculateTime(member,getLastWeek);
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{week}"));
             }
             catch (Exception ex)
             {
@@ -91,7 +97,7 @@ namespace DOJ.Module.Common
             
             try
             {
-                var client = new RestClient($"{Options.RestApiUrl}/characters/job~Bolingbroke Penitentiary/data,job,duty");
+                var client = new RestClient($"{Options.RestApiUrl}/characters/job~Blaine County Fire Department/data,job,duty");
                 var request = new RestRequest()
                 {
                     Method = Method.Get,
@@ -111,8 +117,8 @@ namespace DOJ.Module.Common
                 var prefix = currentWeek ? "This" : "Last";
                 foreach (var staff in json["data"])
                 {
-                    var data = staff["on_duty_time"];
-                    if(!data.HasValues || !data["Law Enforcement"].HasValues)
+                    var characterData = staff;
+                    if(!characterData["on_duty_time"].HasValues || !characterData["on_duty_time"]["Medical"].HasValues)
                     {
                         records.Add(new KeyValuePair<string, string>($"{staff["first_name"]} {staff["last_name"]}", $"No time on duty {prefix} week."));
                         continue;
@@ -122,16 +128,19 @@ namespace DOJ.Module.Common
                     var workTimeTraining = new TimeSpan();
                     var workTimeTotal = new TimeSpan();
                     
-                    if (weekId < 107)
+                    try
                     {
-                        workTimeTotal = TimeSpan.FromSeconds(int.Parse(data["Law Enforcement"][$"{weekId}"].ToString()));
+                        if(weekId < 107)
+                    {
+                        workTimeTotal = TimeSpan.FromSeconds(int.Parse(characterData["on_duty_time"]["Medical"][$"{weekId}"].ToString()));
                     }
                     else
                     {
+
                         try
                         {
                             workTimeNormal = TimeSpan.FromSeconds(
-                                int.Parse(data["Law Enforcement"][$"{weekId}"]["normal"].ToString()));
+                                int.Parse(characterData["on_duty_time"]["Medical"][$"{weekId}"]["normal"].ToString()));
                         }
                         catch
                         {
@@ -141,7 +150,7 @@ namespace DOJ.Module.Common
                         try
                         {
                             workTimeUndercover = TimeSpan.FromSeconds(
-                                int.Parse(data["Law Enforcement"][$"{weekId}"]["undercover"].ToString()));
+                                int.Parse(characterData["on_duty_time"]["Medical"][$"{weekId}"]["undercover"].ToString()));
                         }
                         catch
                         {
@@ -151,7 +160,7 @@ namespace DOJ.Module.Common
                         try
                         {
                             workTimeTraining = TimeSpan.FromSeconds(
-                                int.Parse(data["Law Enforcement"][$"{weekId}"]["training"].ToString()));
+                                int.Parse(characterData["on_duty_time"]["Medical"][$"{weekId}"]["training"].ToString()));
                         }
                         catch
                         {
@@ -159,11 +168,16 @@ namespace DOJ.Module.Common
                         }
 
                         workTimeTotal = workTimeNormal.Add(workTimeUndercover).Add(workTimeTraining);
+
+                    }
+                    }
+                    catch (Exception e)
+                    {
+                        records.Add(new KeyValuePair<string, string>($"{staff["first_name"]} {staff["last_name"]}", $"No time on duty {prefix} week."));
+                        continue;
                     }
 
-                    var workTimeString = workTimeTotal.TotalSeconds > 0
-                                             ? $"{workTimeTotal.Days} Days, {workTimeTotal.Hours} Hours, {workTimeTotal.Minutes} Minutes and {workTimeTotal.Minutes} Seconds"
-                                             : "No Time On Duty";
+                    var workTimeString = ($"{workTimeTotal.Days} Days, {workTimeTotal.Hours} Hours, {workTimeTotal.Minutes} Minutes and {workTimeTotal.Minutes} Seconds");
 
                     records.Add(new KeyValuePair<string, string>($"{staff["first_name"]} {staff["last_name"]}", $"{workTimeString} {prefix} week."));
                 }
@@ -210,6 +224,7 @@ namespace DOJ.Module.Common
         {
             Logger.LogInformation("Getting work time for " + member);
             var weekId = ThisWeeksId() - (lastWeek ? 1 : 0);
+            var week = lastWeek ? "last" : "this";
             var dateRange = GetDateRange(weekId);
             var characterName = Regex.Replace(member, "^[^]]*]", "");
             characterName = characterName.Trim();
@@ -237,10 +252,10 @@ namespace DOJ.Module.Common
                 }
                 var characterData = json["data"][0];
 
-                var x = JObject.FromObject(characterData["on_duty_time"]["Law Enforcement"]);
-                if (!characterData["on_duty_time"].HasValues || !characterData["on_duty_time"]["Law Enforcement"].HasValues)
+                var x = JObject.FromObject(characterData["on_duty_time"]["Medical"]);
+                if (!characterData["on_duty_time"].HasValues || !characterData["on_duty_time"]["Medical"].HasValues)
                 {
-                    return $"{characterName}, you have no time on duty this week";                
+                    return $"{characterName}, you have no time on duty {week} week";                
                 }
                 
                 var workTimeNormal = new TimeSpan();
@@ -251,20 +266,49 @@ namespace DOJ.Module.Common
                 {
                     if(weekId < 107)
                     {
-                        workTimeTotal = TimeSpan.FromSeconds(int.Parse(characterData["on_duty_time"]["Law Enforcement"][$"{weekId}"].ToString()));
+                        workTimeTotal = TimeSpan.FromSeconds(int.Parse(characterData["on_duty_time"]["Medical"][$"{weekId}"].ToString()));
                     }
                     else
                     {
-                        workTimeNormal = TimeSpan.FromSeconds(int.Parse(characterData["on_duty_time"]["Law Enforcement"][$"{weekId}"]["normal"].ToString()));
-                        workTimeUndercover = TimeSpan.FromSeconds(int.Parse(characterData["on_duty_time"]["Law Enforcement"][$"{weekId}"]["undercover"].ToString()));
-                        workTimeTraining = TimeSpan.FromSeconds(int.Parse(characterData["on_duty_time"]["Law Enforcement"][$"{weekId}"]["training"].ToString()));
+
+                        try
+                        {
+                            workTimeNormal = TimeSpan.FromSeconds(
+                                int.Parse(characterData["on_duty_time"]["Medical"][$"{weekId}"]["normal"].ToString()));
+                        }
+                        catch
+                        {
+                            workTimeNormal = TimeSpan.FromSeconds(0);
+                        }
+
+                        try
+                        {
+                            workTimeUndercover = TimeSpan.FromSeconds(
+                                int.Parse(characterData["on_duty_time"]["Medical"][$"{weekId}"]["undercover"].ToString()));
+                        }
+                        catch
+                        {
+                            workTimeUndercover = TimeSpan.FromSeconds(0);
+                        }
+
+                        try
+                        {
+                            workTimeTraining = TimeSpan.FromSeconds(
+                                int.Parse(characterData["on_duty_time"]["Medical"][$"{weekId}"]["training"].ToString()));
+                        }
+                        catch
+                        {
+                            workTimeTraining = TimeSpan.FromSeconds(0);
+                        }
+
                         workTimeTotal = workTimeNormal.Add(workTimeUndercover).Add(workTimeTraining);
+
                     }
                     
                 } 
                 catch(Exception e)
                 {
-                    return $"{characterName}, you have no time on duty this week";
+                    return $"{characterName}, you have no time on duty {week} week";
                 }
                 var workTimeString = ($"{workTimeTotal.Days} Days, {workTimeTotal.Hours} Hours, {workTimeTotal.Minutes} Minutes and {workTimeTotal.Minutes} Seconds");
 
@@ -281,7 +325,7 @@ namespace DOJ.Module.Common
         private static int ThisWeeksId()
         {            
             int epochNow = (int)new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
-            int timestampDifference = epochNow -  Options.WeekZero;
+            int timestampDifference = epochNow - Options.WeekZero;
             return (int)Math.Floor((decimal)(timestampDifference / 604800));
             
         }
@@ -297,8 +341,8 @@ namespace DOJ.Module.Common
             var utcIsoWeek = DateTimeOffset.FromUnixTimeSeconds(timestamp).UtcDateTime;
             var isoWeek = TimeZoneInfo.ConvertTimeFromUtc(utcIsoWeek, TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time")); // Account for DST
 
-            var startOfWeek = isoWeek.ToString("yyyy/MM/dd");
-            var endOfWeek = isoWeek.AddDays(6).ToString("yyyy/MM/dd");
+            var startOfWeek = isoWeek.ToString("yyyy/mm/dd");
+            var endOfWeek = isoWeek.AddDays(6).ToString("yyyy/mm/dd");
 
             return $"{startOfWeek} - {endOfWeek}";
         }

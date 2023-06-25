@@ -7,9 +7,9 @@
 	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-  </PropertyGroup>	
-	
-  <ItemGroup>
+  </PropertyGroup>
+
+	<ItemGroup>
     <PackageReference Include="CloudTheWolf.DSharpPlus.Scaffolding.Data" Version="2.0.0.1" />
     <PackageReference Include="CloudTheWolf.DSharpPlus.Scaffolding.Logging" Version="2.0.0" />
     <PackageReference Include="CloudTheWolf.DSharpPlus.Scaffolding.Shared" Version="2.1.0.6" />

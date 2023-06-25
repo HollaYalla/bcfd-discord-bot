@@ -13,16 +13,13 @@
 		<OutputPath>E:\Harmony\Plugins</OutputPath>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>-->
-	
-  <ItemGroup>
+
+	<ItemGroup>
     <PackageReference Include="CloudTheWolf.DSharpPlus.Scaffolding.Data" Version="2.0.0.1" />
     <PackageReference Include="CloudTheWolf.DSharpPlus.Scaffolding.Logging" Version="2.0.0" />
     <PackageReference Include="CloudTheWolf.DSharpPlus.Scaffolding.Shared" Version="2.1.0.6" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-  </ItemGroup>
-	
-  <ItemGroup>
-    <Folder Include="Commands\" />
+    <PackageReference Include="RestSharp" Version="108.0.3" />
   </ItemGroup>
 
 </Project>
