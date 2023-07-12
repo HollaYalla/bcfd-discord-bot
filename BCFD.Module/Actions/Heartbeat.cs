@@ -111,7 +111,7 @@ namespace BCFD.Module.Actions
         {
             var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Get, "https://c3.cloudthewolf.com/op-framework/duty.json");
-            request.Headers.Add("Authorization", "Bearer AY8I6AE9gpazltXT");
+            request.Headers.Add("Authorization", $"Bearer {Options.ApiKey}");
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
@@ -122,7 +122,7 @@ namespace BCFD.Module.Actions
         {
             var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Get, "https://rest.opfw.net/c3/characters/job~Fire/data,job,duty");
-            request.Headers.Add("Authorization", "Bearer AY8I6AE9gpazltXT");
+            request.Headers.Add("Authorization", $"Bearer {Options.ApiKey}");
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
