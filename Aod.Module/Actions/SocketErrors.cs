@@ -20,7 +20,6 @@ namespace Aod.Module.Actions
         {
             try
             {
-                if(e.Handled) return;
                 Environment.Exit(500);
             }
             catch (Exception ex)

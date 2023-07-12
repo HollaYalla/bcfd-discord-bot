@@ -44,7 +44,6 @@ namespace Aod.Module
                 Client.MessageCreated += Actions.OnMessageCreation.AddVoteReactions;
                 Client.Heartbeated += Actions.Heartbeated.CheckNextChurch;
                 Client.SocketClosed += Actions.SocketErrors.Closed;
-                Client.SocketErrored += Actions.SocketErrors.Errored;
                 AddCommands(bot, this.Name);
             }
             catch (Exception e)
