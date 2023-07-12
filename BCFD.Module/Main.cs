@@ -38,6 +38,7 @@ namespace BCFD.Module
                  Interactivity = bot.Client.GetInteractivity();
                  bot.Client.Intents.AddIntent(DiscordIntents.All);
                  Client = bot.Client;
+                 bot.Client.Heartbeated += Heartbeat.Heartbeated;
                  bot.Client.GuildDownloadCompleted += SetStatus;
                 AddCommands(bot, Name);
 
@@ -54,6 +55,7 @@ namespace BCFD.Module
             Options.WeekZero = applicationConfig.GetValue<int>("WeekZero");
             Options.RestApiUrl = applicationConfig.GetValue<string>("RestApiUrl");
             Options.ApiKey = applicationConfig.GetValue<string>("ApiKey");
+            Options.onDutyChannel = applicationConfig.GetValue<ulong>("dutyChannel");
         }
 
         private static void AddCommands(IBot bot, string Name)
