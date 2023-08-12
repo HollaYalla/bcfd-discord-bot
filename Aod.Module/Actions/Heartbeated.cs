@@ -74,7 +74,7 @@ namespace Aod.Module.Actions
             DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder
             {
                 Title = nextEvent.Name,
-                Description = "Next Church Is Almost Upon Us!",
+                Description = "A New Event Is Almost Upon Us!",
                 Color = DiscordColor.Purple
 
             }.AddField("Start Time", $"<t:{nextEvent.StartTime.ToUnixTimeSeconds()}:f>")
