@@ -1,18 +1,48 @@
 ﻿using DSharpPlus.Entities;
 
-namespace DOJ.Module
+namespace DOC.Module
 {
     internal class Options
     {
+        /// <summary>
+        /// Gets or sets the Guild ID
+        /// </summary>
         public static ulong GuildId { get; set; }
 
-        public static string RestApiUrl { get; set; } = "https://rest.opfw.net/c3"; //Default to International
+        /// <summary>
+        /// Gets or sets the Rest API URL
+        /// </summary>
+        public static string RestApiUrl { get; set; } = "https://rest.opfw.net/c3";
 
         /// <summary>
-        /// OP-FW Week Zero EPOCH Timestamp
+        /// Gets or sets OP-FW Week Zero EPOCH Timestamp
+        /// 1609113600 = Monday, 28 December 2020 00:00:00
         /// </summary>
-        public static int WeekZero { get; set; } = 1609113600; // 1609113600 = Monday, 28 December 2020 00:00:00
+        public static int WeekZero { get; set; } = 1609113600;
+        
+        /// <summary>
+        /// Gets or sets the API URL for Non-Rest API Calls
+        /// </summary>
+        public static string ApiUrl { get; set; }
 
-        public static string ApiKey { get; set; } // Get this from OP-FW Discord
+        /// <summary>
+        /// Gets or sets the API Key for authentication with <see cref="RestApiUrl"/>
+        /// </summary>
+        public static string ApiKey { get; set; }
+
+        /// <summary>
+        /// Gets or sets the channel within <see cref="GuildId"/> to post On Duty Messages
+        /// </summary>
+        public static ulong OnDutyChannel { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last message ID for the On Duty Message
+        /// </summary>
+        public static ulong OnDutyMessage { get; set; } = ulong.MinValue;
+
+        /// <summary>
+        /// Gets or sets the last message <see cref="DateTime"/>
+        /// </summary>
+        public static DateTime LastMessage { get; set; } = DateTime.MinValue;
     }
 }
