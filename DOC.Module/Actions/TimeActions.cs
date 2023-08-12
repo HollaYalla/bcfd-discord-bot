@@ -2,8 +2,8 @@
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using DOJ.Module.Common;
-using DOJ.Module.Libs;
+using DOC.Module.Common;
+using DOC.Module.Libs;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -12,8 +12,10 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-namespace DOJ.Module.Actions
+namespace DOC.Module.Actions
 {
+    using DOC.Module.Common;
+
     [SlashCommandGroup("Timesheets", "Staff Timesheets", true)]
     class TimeActions : ApplicationCommandModule
     {

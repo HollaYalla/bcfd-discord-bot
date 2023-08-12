@@ -3,7 +3,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using DOJ.Module.Libs;
+using DOC.Module.Libs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using DSharpPlus.Net;
@@ -16,7 +16,7 @@ using Newtonsoft.Json.Linq;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-namespace DOJ.Module.Common
+namespace DOC.Module.Common
 {
     internal class StaffCommon
     {

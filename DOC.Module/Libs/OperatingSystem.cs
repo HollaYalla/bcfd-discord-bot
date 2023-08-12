@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace DOJ.Module.Libs
+namespace DOC.Module.Libs
 {
     public static class OperatingSystem
     {
