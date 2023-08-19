@@ -98,7 +98,7 @@ namespace DOC.Module.Actions
             {
                 foreach (var onDuty in duty["data"]["Law Enforcement"])
                 {
-                    if (onDuty["department"].ToString().ToLower() != "bolingbroke benitentiary") continue;
+                    if (onDuty["department"].ToString().ToLower() != "doc") continue;
                     docDuty.Add(onDuty);
                 }
             }
