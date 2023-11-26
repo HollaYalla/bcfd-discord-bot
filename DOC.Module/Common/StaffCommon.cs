@@ -22,12 +22,12 @@ namespace DOC.Module.Common
     {
         private static readonly ILogger<Logger> Logger = Main.Logger;
 
-        public static async Task GetUserTime(InteractionContext ctx, string member)
+        public static async Task GetUserTime(InteractionContext ctx, string member, bool getLastWeek = false)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
             try
             {
-                var message = CalculateTime(member);
+                var message = CalculateTime(member, getLastWeek);
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(message));
             }
             catch (Exception ex)
@@ -216,6 +216,118 @@ namespace DOC.Module.Common
 
 
         private static string CalculateTime(string member, bool lastWeek = false)
+        {
+            Logger.LogInformation("Getting work time for " + member);
+            var weekId = ThisWeeksId() - (lastWeek ? 1 : 0);
+            var week = lastWeek ? "last" : "this";
+            var dateRange = GetDateRange(weekId);
+            var characterName = Regex.Replace(member, "^[^]]*]", "");
+            characterName = characterName.Trim();
+
+
+            try
+            {
+                var client = new RestClient($"{Options.RestApiUrl}/characters/name={characterName}/data,job,duty");
+                var request = new RestRequest() { Method = Method.Get, Timeout = -1 };
+                request.AddHeader("Authorization", $"Bearer {Options.ApiKey}");
+                var response = client.Execute(request);
+                Console.WriteLine(response.Content);
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    throw new Exception("Error with API, HTTP Status Code Not OK");
+                }
+
+                var json = JObject.Parse(response.Content);
+                if (!json["data"].Any())
+                {
+                    return "Unable to load character data  is you Discord Nickname the same as your Character Name?";
+                }
+
+                var characterData = json["data"][0]["on_duty_time"];
+
+
+                if (characterData == null)
+                {
+                    return $"{characterName}, you have no time on duty {week} week";
+                }
+
+                characterData = JObject.Parse(characterData.ToString());
+
+                if (!characterData["Law Enforcement"].HasValues)
+                {
+                    return $"{characterName}, you have no time on duty {week} week";
+                }
+
+                var workTimeNormal = new TimeSpan();
+                var workTimeUndercover = new TimeSpan();
+                var workTimeTraining = new TimeSpan();
+                var workTimeTotal = new TimeSpan();
+                try
+                {
+                    if (weekId < 107)
+                    {
+                        workTimeTotal = TimeSpan.FromSeconds(
+                            int.Parse(characterData["Law Enforcement"][$"{weekId}"].ToString()));
+                    }
+                    else
+                    {
+
+                        try
+                        {
+                            workTimeNormal = TimeSpan.FromSeconds(
+                                int.Parse(characterData["Law Enforcement"][$"{weekId}"]["normal"].ToString()));
+                        }
+                        catch
+                        {
+                            workTimeNormal = TimeSpan.FromSeconds(0);
+                        }
+
+                        try
+                        {
+                            workTimeUndercover = TimeSpan.FromSeconds(
+                                int.Parse(
+                                    characterData["Law Enforcement"][$"{weekId}"]["undercover"].ToString()));
+                        }
+                        catch
+                        {
+                            workTimeUndercover = TimeSpan.FromSeconds(0);
+                        }
+
+                        try
+                        {
+                            workTimeTraining = TimeSpan.FromSeconds(
+                                int.Parse(
+                                    characterData["Law Enforcement"][$"{weekId}"]["training"].ToString()));
+                        }
+                        catch
+                        {
+                            workTimeTraining = TimeSpan.FromSeconds(0);
+                        }
+
+                        workTimeTotal = workTimeNormal.Add(workTimeUndercover).Add(workTimeTraining);
+
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    return $"{characterName}, you have no time on duty {week} week";
+                }
+
+                var workTimeString =
+                    ($"{workTimeTotal.Days} Days, {workTimeTotal.Hours} Hours, {workTimeTotal.Minutes} Minutes and {workTimeTotal.Minutes} Seconds");
+
+                return $"{characterName}, you currently have total of **{workTimeString}** on duty {week} week";
+
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"{ex}");
+                throw;
+            }
+        }
+
+        private static string CalculateTimeOld(string member, bool lastWeek = false)
         {
             Logger.LogInformation("Getting work time for " + member);
             var weekId = ThisWeeksId() - (lastWeek ? 1 : 0);
