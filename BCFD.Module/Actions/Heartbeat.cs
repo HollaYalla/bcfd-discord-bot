@@ -110,7 +110,7 @@ namespace BCFD.Module.Actions
         private static async Task<JObject> GetDuty()
         {
             var client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://c3.cloudthewolf.com/op-framework/duty.json");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{Options.ApiUrl}/op-framework/duty.json");
             request.Headers.Add("Authorization", $"Bearer {Options.ApiKey}");
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
@@ -121,7 +121,7 @@ namespace BCFD.Module.Actions
         private static async Task SetStaffJOject()
         {
             var client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://rest.opfw.net/c3/characters/job~Fire/data,job,duty");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{Options.RestApiUrl}/c3/characters/job~Fire/data,job,duty");
             request.Headers.Add("Authorization", $"Bearer {Options.ApiKey}");
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
