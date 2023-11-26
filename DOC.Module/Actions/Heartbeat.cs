@@ -147,7 +147,7 @@ namespace DOC.Module.Actions
         private static async Task GetStaffAsync()
         {
             var client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://rest.opfw.net/c3/characters/job~Bolingbroke Penitentiary/data,job,duty");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{Options.RestApiUrl}/characters/job~Bolingbroke Penitentiary/data,job,duty");
             request.Headers.Add("Authorization", $"Bearer {Options.ApiKey}");
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();

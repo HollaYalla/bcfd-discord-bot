@@ -98,25 +98,34 @@ namespace DOC.Module.Common
                     Timeout = -1
                 };
                 request.AddHeader("Authorization", $"Bearer {Options.ApiKey}");
-                var response = client.Execute(request);
+                var response = await client.ExecuteAsync(request);
                 Console.WriteLine(response.Content);
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     throw new Exception("Error with API, HTTP Status Code Not OK");
                 }
 
-                JObject json = JObject.Parse(response.Content);
+                var json = JObject.Parse(response.Content);
                 
                 var records = new List<KeyValuePair<string, string>>();
                 var prefix = currentWeek ? "This" : "Last";
                 foreach (var staff in json["data"])
                 {
                     var data = staff["on_duty_time"];
-                    if(!data.HasValues || !data["Law Enforcement"].HasValues)
+                    if (data == null)
                     {
                         records.Add(new KeyValuePair<string, string>($"{staff["first_name"]} {staff["last_name"]}", $"No time on duty {prefix} week."));
                         continue;
                     }
+
+                    data = JObject.Parse(data.ToString());
+
+                    if (!data["Law Enforcement"].HasValues)
+                    {
+                        records.Add(new KeyValuePair<string, string>($"{staff["first_name"]} {staff["last_name"]}", $"No time on duty {prefix} week."));
+                        continue;
+                    }
+
                     var workTimeNormal = new TimeSpan();
                     var workTimeUndercover = new TimeSpan();
                     var workTimeTraining = new TimeSpan();
@@ -211,6 +220,7 @@ namespace DOC.Module.Common
             Logger.LogInformation("Getting work time for " + member);
             var weekId = ThisWeeksId() - (lastWeek ? 1 : 0);
             var dateRange = GetDateRange(weekId);
+            var week = lastWeek ? "last" : "this";
             var characterName = Regex.Replace(member, "^[^]]*]", "");
             characterName = characterName.Trim();
 
@@ -230,17 +240,24 @@ namespace DOC.Module.Common
                 {
                     throw new Exception("Error with API, HTTP Status Code Not OK");
                 }
+
                 var json = JObject.Parse(response.Content);
                 if (!json["data"].Any())
                 {
                     return "Unable to load character data  is you Discord Nickname the same as your Character Name?";
                 }
-                var characterData = json["data"][0];
+                var characterData = json["data"][0]["on_duty_time"];
 
-                var x = JObject.FromObject(characterData["on_duty_time"]["Law Enforcement"]);
-                if (!characterData["on_duty_time"].HasValues || !characterData["on_duty_time"]["Law Enforcement"].HasValues)
+                if (characterData == null)
                 {
-                    return $"{characterName}, you have no time on duty this week";                
+                    return $"{characterName}, you have no time on duty {week} week";
+                }
+
+                characterData = JObject.Parse(characterData.ToString());
+
+                if (!characterData["Law Enforcement"].HasValues)
+                {
+                    return $"{characterName}, you have no time on duty {week} week";                
                 }
                 
                 var workTimeNormal = new TimeSpan();
@@ -281,7 +298,7 @@ namespace DOC.Module.Common
         private static int ThisWeeksId()
         {            
             int epochNow = (int)new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
-            int timestampDifference = epochNow -  Options.WeekZero;
+            int timestampDifference = epochNow - Options.WeekZero;
             return (int)Math.Floor((decimal)(timestampDifference / 604800));
             
         }
