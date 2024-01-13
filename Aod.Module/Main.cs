@@ -43,7 +43,6 @@ namespace Aod.Module
                 Client.GuildDownloadCompleted += Actions.GuildDownloadCompleted.SetStatus;
                 Client.MessageCreated += Actions.OnMessageCreation.AddVoteReactions;
                 Client.Heartbeated += Actions.Heartbeated.CheckNextChurch;
-                Client.SocketClosed += Actions.SocketErrors.Closed;
                 
                 AddCommands(bot, this.Name);
             }

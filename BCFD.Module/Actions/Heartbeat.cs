@@ -94,14 +94,22 @@ namespace BCFD.Module.Actions
             message += "__**On Duty**__\n";
             foreach (var user in fdDuty)
             {
-                var name = "";
-                foreach (var staff in AllFdStaff["data"])
+                try
                 {
-                    if (staff["character_id"].ToString() != user["characterId"].ToString()) continue;
-                    name = $"{staff["first_name"]} {staff["last_name"]}";
+                    var name = "";
+                    foreach (var staff in AllFdStaff["data"])
+                    {
+                        if (staff["character_id"].ToString() != user["characterId"].ToString()) continue;
+                        name = $"{staff["first_name"]} {staff["last_name"]}";
+                    }
+
+                    message += $"<:BCFD:995436961848365146> {name} ";
+                    message += bool.Parse(user["training"].ToString()) ? " [Training]\n" : "\n";
                 }
-                message += $"<:BCFD:995436961848365146> {name} ";
-                message += bool.Parse(user["training"].ToString()) ? " [Training]\n" : "\n";
+                catch (Exception ex)
+                {
+                    Main.Logger.LogError($"[ERROR] {ex.Message}\n{ex}");
+                }
             }
 
             return message;
@@ -121,7 +129,7 @@ namespace BCFD.Module.Actions
         private static async Task SetStaffJOject()
         {
             var client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, $"{Options.RestApiUrl}/c3/characters/job~Fire/data,job,duty");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{Options.RestApiUrl}/characters/job~Fire/data,job,duty");
             request.Headers.Add("Authorization", $"Bearer {Options.ApiKey}");
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();

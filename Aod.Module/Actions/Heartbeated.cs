@@ -16,13 +16,12 @@ namespace Aod.Module.Actions
         {           
             Main.Logger.LogInformation("Heartbeat");
             if (Options.ReminderChannel == null) return;
+            TimeSpan lastMessageSentAge;
             try
             {
-                var channelMessages = await Options.ReminderChannel.GetMessagesAsync();
-                var lastMessageSent = channelMessages[0];
-                TimeSpan diff = DateTime.UtcNow.Subtract(lastMessageSent.CreationTimestamp.UtcDateTime);
-                Main.Logger.LogInformation($"{DateTime.UtcNow.Subtract(lastMessageSent.CreationTimestamp.DateTime).TotalHours}");
-                if (DateTime.UtcNow.Subtract(lastMessageSent.CreationTimestamp.DateTime).TotalHours < 23) 
+                lastMessageSentAge = await GetLastMessageAgeAsync();
+                Main.Logger.LogInformation($"{lastMessageSentAge.TotalHours}");
+                if (lastMessageSentAge.TotalHours < 23) 
                 {
                     Main.Logger.LogInformation("No need to remind people");
                     return;
@@ -51,7 +50,7 @@ namespace Aod.Module.Actions
                 {
                     search = discordEvent.StartTime.DateTime;
                 }
-                if (search < newest)
+                if (search < newest && ( nextEvent == null || (nextEvent != null && search < nextEvent.StartTime.DateTime)))
                 {
                     Main.Logger.LogInformation($"{search} is closer than {newest}");
                     nextEvent = discordEvent;
@@ -70,7 +69,15 @@ namespace Aod.Module.Actions
             }
 
             var desc = string.IsNullOrWhiteSpace(nextEvent.Description) ? "None" : nextEvent.Description;
-
+            lastMessageSentAge = await GetLastMessageAgeAsync();
+#if(DEBUG)
+            if (lastMessageSentAge.TotalHours < 23)
+            {
+                
+                Main.Logger.LogInformation("Seems we don't need to do anything...");
+                return;
+            }
+#endif
             DiscordEmbedBuilder embedBuilder = new DiscordEmbedBuilder
             {
                 Title = nextEvent.Name,
@@ -84,6 +91,14 @@ namespace Aod.Module.Actions
                 .WithImageUrl("https://cdn.discordapp.com/attachments/1054807586194595931/1074696201192099861/image.png")
                 .WithFooter("Created By CloudTheWolf 🐺", "https://cdn.discordapp.com/attachments/839793938281791508/839794154149117952/pngtuber-closed-2.png");
             await Options.ReminderChannel.SendMessageAsync("<@&1071145434074075338> - ** 🔔 Event Reminder**", embedBuilder.Build());
+        }
+
+        private static async Task<TimeSpan> GetLastMessageAgeAsync()
+        {
+            var channelMessages = await Options.ReminderChannel.GetMessagesAsync();
+            var lastMessageSent = channelMessages[0];
+            TimeSpan diff = DateTime.UtcNow.Subtract(lastMessageSent.CreationTimestamp.UtcDateTime);
+            return diff;
         }
     }
 }

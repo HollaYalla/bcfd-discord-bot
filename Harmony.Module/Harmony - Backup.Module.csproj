@@ -25,6 +25,7 @@
 	
   <ItemGroup>
     <Folder Include="Commands\" />
+    <Folder Include="NewFolder\" />
   </ItemGroup>
 
 </Project>

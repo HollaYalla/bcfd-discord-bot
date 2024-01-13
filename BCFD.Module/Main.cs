@@ -53,6 +53,7 @@ namespace BCFD.Module
         {
             Options.GuildId = applicationConfig.GetValue<ulong>("GuildId");
             Options.WeekZero = applicationConfig.GetValue<int>("WeekZero");
+            Options.ApiUrl = applicationConfig.GetValue<string>("ApiUrl");
             Options.RestApiUrl = applicationConfig.GetValue<string>("RestApiUrl");
             Options.ApiKey = applicationConfig.GetValue<string>("ApiKey");
             Options.onDutyChannel = applicationConfig.GetValue<ulong>("dutyChannel");

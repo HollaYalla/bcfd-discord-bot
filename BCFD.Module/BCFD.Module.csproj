@@ -9,14 +9,7 @@
 	<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
-	
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-      <OutputPath>E:\Harmony\Plugins\BCFD</OutputPath>
-      <PlatformTarget>AnyCPU</PlatformTarget>
-	  </PropertyGroup>
-  
-
-	<ItemGroup>
+  <ItemGroup>
     <PackageReference Include="CloudTheWolf.DSharpPlus.Scaffolding.Data" Version="2.0.0.1" />
     <PackageReference Include="CloudTheWolf.DSharpPlus.Scaffolding.Logging" Version="2.0.0.2" />
     <PackageReference Include="CloudTheWolf.DSharpPlus.Scaffolding.Shared" Version="2.1.1.3" />

@@ -3,12 +3,14 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Harmony.Module.Libs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
 namespace Harmony.Module.Common
 {
+    using System.Diagnostics;
+    using Harmony.Module.Libs;
+
     internal class StaffCommon
     {
         private static readonly DatabaseActions Da = new();
@@ -18,7 +20,8 @@ namespace Harmony.Module.Common
         {
             if (member == null)
                 member = ctx.Member;
-            if (member!.IsBot)
+            Debug.Assert(member != null, nameof(member) + " != null");
+            if (member.IsBot)
                 return;
             try
             {
@@ -172,74 +175,63 @@ namespace Harmony.Module.Common
         private static async Task<(DiscordEmbedBuilder embed, DiscordEmbedBuilder embed2, DiscordEmbedBuilder embed3)> GetWeekEmbed(bool currentWeek = true)
         {
             var allStaff = Da.GetAllStaff();
-            var records = new List<KeyValuePair<string, TimeSpan>>();
+            var records = new List<KeyValuePair<string, Dictionary<string,object>>>();
             var prefix = currentWeek ? "This" : "Last";
             foreach (var staff in allStaff)
             {
-                var data = Da.GetUserTime(staff["name"].ToString(), currentWeek);
+                var data = Da.GetUserTime(staff, currentWeek);
+                var repairs = Da.GetUserRepairs(staff,currentWeek);
                 var time = string.IsNullOrEmpty(data[0]["Time"].ToString())
                     ? TimeSpan.FromSeconds(0.0)
                     : TimeSpan.FromSeconds(int.Parse(data[0]["Time"].ToString()));
-                records.Add(new KeyValuePair<string, TimeSpan>(staff["name"].ToString(), time));
+                var values = new Dictionary<string, object>
+                {
+                    { "time", time }
+                };
+                values.Add("repairs",repairs?.Count ?? -1);
+                records.Add(new KeyValuePair<string, Dictionary<string, object>>(staff["name"].ToString(), values));
             }
 
             var embed = new DiscordEmbedBuilder()
             {
                 Title = $"{prefix} Weeks Timesheets",
-                Color = DiscordColor.Green
+                Color = DiscordColor.DarkGreen
             };
             var embed2 = new DiscordEmbedBuilder()
             {
                 Title = $"{prefix} Weeks Timesheets Part 2",
-                Color = DiscordColor.Yellow
+                Color = DiscordColor.Green
             };
             var embed3 = new DiscordEmbedBuilder()
             {
                 Title = $"{prefix} Weeks Timesheets Part 3",
-                Color = DiscordColor.Red
+                Color = DiscordColor.SapGreen
             };
             foreach (var record in records)
             {
-                var extra = "✅ ";
-                TimeSpan timeSpan;
-                if (record.Key != "Max Maxwell")
-                {
-                    timeSpan = record.Value;
-                    if (timeSpan.TotalHours == 0.0)
-                    {
-                        extra = "❗ ";
-                    }
-                    else
-                    {
-                        timeSpan = record.Value;
-                        if (timeSpan.TotalHours <= 2.0)
-                        {
-                            extra = "⚠️ ";
-                        }
-                        else
-                        {
-                            timeSpan = record.Value;
-                            int num;
-                            if (timeSpan.TotalHours > 2.0)
-                            {
-                                timeSpan = record.Value;
-                                num = timeSpan.TotalHours < 4.0 ? 1 : 0;
-                            }
-                            else
-                                num = 0;
+                var inline = true;
+                var stats = record.Value;
+                var stat = $"🕛: {stats["time"].ToString()!.Replace(".", "d - ")}";
+                if (int.Parse(stats["repairs"].ToString()) > -1)
+                    stat += $"\n 🧰: {stats["repairs"]}";
+                else
+                    stat += "\n 🛻: --";
+                var activeEmbed = new DiscordEmbedBuilder();
 
-                            if (num != 0)
-                                extra = "\uD83D\uDFE1 ";
-                        }
-                    }
+                switch (embed.Fields.Count)
+                {
+                    case < 25:
+                        activeEmbed = embed;
+                        break;
+                    case 25 when embed2.Fields.Count < 25:
+                        activeEmbed = embed2;
+                        break;
+                    case 25 when embed2.Fields.Count == 25:
+                        activeEmbed = embed3;
+                        break;
                 }
 
-                if (embed.Fields.Count < 25)
-                    embed.AddField(extra + record.Key, record.Value.ToString().Replace(".", "d - "));
-                else if (embed.Fields.Count == 25 && embed2.Fields.Count < 25)
-                    embed2.AddField(extra + record.Key, record.Value.ToString().Replace(".", "d - "));
-                else if (embed2.Fields.Count == 25 && embed3.Fields.Count < 25)
-                    embed3.AddField(extra + record.Key, record.Value.ToString().Replace(".", "d - "));
+                activeEmbed.AddField(record.Key, stat,inline);
 
             }
 
