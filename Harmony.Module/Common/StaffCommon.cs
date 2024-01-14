@@ -16,25 +16,6 @@ namespace Harmony.Module.Common
         private static readonly DatabaseActions Da = new();
         private static readonly ILogger<Logger> Logger = Main.Logger;
 
-        public static async Task GetUserTime(CommandContext ctx, DiscordMember member)
-        {
-            if (member == null)
-                member = ctx.Member;
-            Debug.Assert(member != null, nameof(member) + " != null");
-            if (member.IsBot)
-                return;
-            try
-            {
-                await ctx.Message.DeleteAsync();
-                var message = CalculateTime(member);
-                await ctx.Channel.SendMessageAsync(message);
-            }
-            catch (Exception ex)
-            {
-                await ctx.RespondAsync($"Error: {ex.Message}\n```{ex}```");
-            }
-        }
-
         public static async Task GetUserTime(InteractionContext ctx, DiscordMember member)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
@@ -42,7 +23,8 @@ namespace Harmony.Module.Common
                 return;
             try
             {
-                var message = StaffCommon.CalculateTime(member);
+                var staff = Da.GetStaffMember(member);
+                var message = StaffCommon.CalculateTime(member, staff[0]);
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(message));
             }
             catch (Exception ex)
@@ -127,22 +109,6 @@ namespace Harmony.Module.Common
             await ctx.EditResponseAsync(new DiscordWebhookBuilder()
                 .WithContent("Last Weeks Timesheets")
                 .AddEmbeds(new List<DiscordEmbed>() { embed }));
-        }
-
-        public static async Task GetTotalTime(CommandContext ctx, DiscordMember member)
-        {
-            if (member.IsBot)
-                return;
-            try
-            {
-                await ctx.Message.DeleteAsync();
-                await ctx.Channel.SendMessageAsync(CalculateTime(member));
-            }
-            catch (Exception ex)
-            {
-                Main.Logger.LogError(ex.Message);
-                await ctx.RespondAsync(ex.Message);
-            }
         }
 
         public static async Task GetTotalTime(InteractionContext ctx, DiscordMember member)
@@ -239,12 +205,12 @@ namespace Harmony.Module.Common
         }
 
 
-        private static string CalculateTime(DiscordMember member)
+        private static string CalculateTime(DiscordMember member, JToken memberRecord)
         {
             Logger.LogInformation("Getting work time for " + member.Nickname);
             try
             {
-                JArray userTime = StaffCommon.Da.GetUserTime(member.Nickname);
+                JArray userTime = StaffCommon.Da.GetUserTime(memberRecord);
                 if (string.IsNullOrEmpty(userTime[0]["Time"]!.ToString()))
                     return member.Mention + " has worked for `00:00:00` this week";
                 string str = TimeSpan.FromSeconds(int.Parse(userTime[0]["Time"].ToString())).ToString();

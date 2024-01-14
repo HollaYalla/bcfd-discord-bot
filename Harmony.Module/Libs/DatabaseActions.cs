@@ -1,6 +1,7 @@
 ﻿
 using CloudTheWolf.DSharpPlus.Scaffolding.Data;
 using CloudTheWolf.DSharpPlus.Scaffolding.Logging;
+using DSharpPlus.Entities;
 using Harmony.Module.Common;
 using Harmony.Module.Extensions;
 using Microsoft.Extensions.Logging;
@@ -61,6 +62,12 @@ namespace Harmony.Module.Libs
         public JArray GetUserTotalTime(string name) => JArray.Parse(_sda!.Request("SELECT SUM(`totalTime`) as Time FROM `workTime` INNER JOIN `users` on workTime.cid = users.cid WHERE users.name = '" + name.Replace("'", "''") + "';", DbLogger));
 
         public JArray GetAllStaff() => JArray.Parse(_sda!.Request("SELECT * FROM `users` WHERE `disabled` = 0 and `role` != 'IT Support';", DbLogger));
+
+        public JArray GetStaffMember(DiscordMember member)
+        {
+            return JArray.Parse(_sda!.Request($"SELECT * FROM `users` WHERE `disabled` = 0 and (`discord` = '{member.Id}' OR `name` = '{member.Nickname}');",
+                DbLogger));
+        }
         /// <summary>
         /// Find the Beginning of the week for the date provided
         /// </summary>
