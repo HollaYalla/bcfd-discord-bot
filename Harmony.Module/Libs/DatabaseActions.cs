@@ -163,6 +163,23 @@ namespace Harmony.Module.Libs
 
         }
 
+        internal JArray GetUserImpounds(JToken staff, bool currentWeek)
+        {
+            if (staff["role"].ToString() == StaffRoles.Role.IT_SUPPORT.GetStringValue())
+                return null;
+
+            var (startDate, startTime, endDate, endTime) = GetTimeWindow(currentWeek);
+
+            DbLogger.LogInformation($"Get Impounds For User {staff["name"]} between {startDate:yyyy-MM-dd} {startTime} and {endDate:yyyy-MM-dd} {endTime}");
+
+            var timeWindow = !currentWeek ? $"`timestamp` between '{startDate:yyyy-MM-dd} {startTime}' " +
+                                            $"and '{endDate:yyyy-MM-dd} {endTime}'" :
+                $"`timestamp` > '{startDate:yyyy-MM-dd} {startTime}'";
+
+            var query = $"SELECT * FROM cityTowLogs WHERE characterId = {staff["cid"]} AND {timeWindow};";
+            return JArray.Parse(_sda.Request(query, DbLogger));
+        }
+
         private static (DateTime startDate, string startTime, DateTime endDate, string endTime) GetTimeWindow(bool currentWeek)
         {
             var startOfWeekDate = GetStartOfWeekDate(!currentWeek ? DateTime.Today.AddDays(-7) : DateTime.Today);
@@ -176,5 +193,7 @@ namespace Harmony.Module.Libs
             var endTime = timeZoneInfo.IsDaylightSavingTime(startOfWeekDate.Date) ? "00:00:59" : "23:59:59";
             return (startOfWeekDate, startTime, endDate, endTime);
         }
+
+        
     }
 }

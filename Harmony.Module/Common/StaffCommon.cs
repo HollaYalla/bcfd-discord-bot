@@ -147,6 +147,7 @@ namespace Harmony.Module.Common
             {
                 var data = Da.GetUserTime(staff, currentWeek);
                 var repairs = Da.GetUserRepairs(staff,currentWeek);
+                var impounds = Da.GetUserImpounds (staff, currentWeek);
                 var time = string.IsNullOrEmpty(data[0]["Time"].ToString())
                     ? TimeSpan.FromSeconds(0.0)
                     : TimeSpan.FromSeconds(int.Parse(data[0]["Time"].ToString()));
@@ -155,7 +156,9 @@ namespace Harmony.Module.Common
                     { "time", time }
                 };
                 values.Add("repairs",repairs?.Count ?? -1);
+                values.Add("impounds",impounds?.Count ?? 0);
                 records.Add(new KeyValuePair<string, Dictionary<string, object>>(staff["name"].ToString(), values));
+
             }
 
             var embed = new DiscordEmbedBuilder()
@@ -181,7 +184,10 @@ namespace Harmony.Module.Common
                 if (int.Parse(stats["repairs"].ToString()) > -1)
                     stat += $"\n 🧰: {stats["repairs"]}";
                 else
-                    stat += "\n 🛻: --";
+                    stat += "\n 🧰: --";
+
+                stat += $"\n 🛻: {stats["impounds"]}";
+
                 var activeEmbed = new DiscordEmbedBuilder();
 
                 switch (embed.Fields.Count)
