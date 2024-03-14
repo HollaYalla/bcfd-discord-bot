@@ -89,7 +89,7 @@ namespace BCFD.Module.Actions
                 Main.Logger.LogInformation("[Heartbeat-CreateMessage] No Medical Duty");
             }
 
-            message += $"**Total:** {fdDuty.Count}\n\n";
+            message += $"**Total:** {fdDuty.Count}\n\n | **Training:** {fdDuty.Training}";
 
             message += "__**On Duty**__\n";
             foreach (var user in fdDuty)
@@ -101,9 +101,12 @@ namespace BCFD.Module.Actions
                     {
                         if (staff["character_id"].ToString() != user["characterId"].ToString()) continue;
                         name = $"{staff["first_name"]} {staff["last_name"]}";
+                        
+                        if (staff["character_id"].ToString() != user["characterId"].ToString()) continue;
+                        callsign = $"{staff["callsign"]}";
                     }
 
-                    message += $"<:BCFD:995436961848365146> {name} ";
+                    message += $"<:BCFD:995436961848365146> [{callsign}] {name} ";
                     message += bool.Parse(user["training"].ToString()) ? " [Training]\n" : "\n";
                 }
                 catch (Exception ex)
