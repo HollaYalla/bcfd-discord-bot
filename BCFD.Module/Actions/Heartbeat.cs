@@ -89,7 +89,7 @@ namespace BCFD.Module.Actions
                 Main.Logger.LogInformation("[Heartbeat-CreateMessage] No Medical Duty");
             }
 
-            message += $"**Total:** {fdDuty.Count}\n\n | **Training:** {fdDuty.Training}";
+            message += $"**Total:** {fdDuty.Count}\n\n | **Training:** {fdTraining.Count}";
 
             message += "__**On Duty**__\n";
             foreach (var user in fdDuty)
